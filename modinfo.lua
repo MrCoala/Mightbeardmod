@@ -3,7 +3,7 @@ name = "Mighty beard mod"
 description = "This mod will help you maintain your mighty beard"
 
 author = "MrCoala"
-version = "0.0.1"
+version = "0.0.2"
 
 forumthread = ""
 

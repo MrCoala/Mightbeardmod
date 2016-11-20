@@ -15,6 +15,9 @@ local protectedList = {
 	"cookpot",
 	"meatrack"
 }
+--[[///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////// Helper functions.////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////]]--
 
 function isProtected(prefab)
 	local match = 0
@@ -39,7 +42,7 @@ end
 
 local function writeLog(text)
 	local world_age = GLOBAL.TheWorld.components.worldstate.data.cycles
-	text = "[ALERT AT DAY: " .. world_age .. "] - " .. text
+	text = "[ALERT AT DAY: " .. world_age .. "] " .. text
 	print( text )
 	local file = io.open("mightybeard.txt", "r")
 	if file ~= nil then
@@ -60,12 +63,15 @@ local function say(user, say_string, time)
 	end)
 end
 
+--[[///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////// Attacking with a hammer ////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////]]--
 
 local old_ACTION_HAMMER = GLOBAL.ACTIONS.HAMMER.fn
 GLOBAL.ACTIONS.HAMMER.fn = function(act)
 	
 	if act.target.prefab and isProtected(act.target.prefab) then
-		local log = "-> " .. tostring(act.doer.name) .. " hammered the " .. tostring(act.target.prefab)
+		local log = "-> " .. tostring(act.doer.name) .. " (".. tostring(act.doer.userid) ..") hammered the " .. tostring(act.target.prefab)
 		writeLog( log )
 	end
 	
@@ -73,3 +79,41 @@ GLOBAL.ACTIONS.HAMMER.fn = function(act)
 	
 end
 
+--[[///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////// Lighting on fire, attacking with a torch.////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////]]--
+
+AddComponentPostInit("lighter", function(Lighter, inst)
+
+    Lighter.oldLightFn = Lighter.Light
+    
+   function Lighter:Light(target)
+   
+   
+   		local log = "-> " .. tostring(inst.components.inventoryitem.owner.name) .. " (".. tostring(inst.components.inventoryitem.owner.userid) ..") used their lighter on " .. tostring(target)
+		writeLog( log )
+
+        return Lighter:oldLightFn(target)
+        
+    end
+end)
+--[[
+AddPrefabPostInit("torch", function (inst)
+
+    local function OnAttack(weapon, attacker, target)
+		if GLOBAL.TheWorld.components.worldstate.data.cycles >= starting_day then
+			if target ~= nil and target.components.burnable ~= nil and math.random() < GLOBAL.TUNING.TORCH_ATTACK_IGNITE_PERCENT * target.components.burnable.flammability and IsAllowed(attacker) then
+				target.components.burnable:Ignite(nil, attacker)
+			end
+		else
+			if target ~= nil and target.components.burnable ~= nil and math.random() < GLOBAL.TUNING.TORCH_ATTACK_IGNITE_PERCENT * target.components.burnable.flammability then
+				target.components.burnable:Ignite(nil, attacker)
+			end
+		end
+	end
+    
+    if inst.components.weapon then
+        inst.components.weapon:SetAttackCallback(OnAttack)
+    end
+end)
+--]]
