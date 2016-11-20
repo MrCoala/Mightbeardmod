@@ -16,13 +16,15 @@ local protectedList = {
 	"meatrack"
 }
 
-local function isProtected(prefab)
-	for i,v in ipairs(protectedList) do
-		if v == prefab then
-			return true
+function isProtected(prefab)
+	local match = 0
+	for _, ele in ipairs(protectedList) do
+		if ele == prefab then
+			match = match + 1
+			break
 		end
 	end
-	return false
+	return match
 end
 
 local function printTable(tb)	
