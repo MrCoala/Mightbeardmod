@@ -90,30 +90,25 @@ AddComponentPostInit("lighter", function(Lighter, inst)
    function Lighter:Light(target)
    
    
-   		local log = "-> " .. tostring(inst.components.inventoryitem.owner.name) .. " (".. tostring(inst.components.inventoryitem.owner.userid) ..") used their lighter on " .. tostring(target)
+   		local log = "-> " .. tostring(inst.components.inventoryitem.owner.name) .. " (".. tostring(inst.components.inventoryitem.owner.userid) ..") used their lighter on " .. tostring(target.prefab)
 		writeLog( log )
 
         return Lighter:oldLightFn(target)
         
     end
 end)
---[[
-AddPrefabPostInit("torch", function (inst)
 
-    local function OnAttack(weapon, attacker, target)
-		if GLOBAL.TheWorld.components.worldstate.data.cycles >= starting_day then
-			if target ~= nil and target.components.burnable ~= nil and math.random() < GLOBAL.TUNING.TORCH_ATTACK_IGNITE_PERCENT * target.components.burnable.flammability and IsAllowed(attacker) then
-				target.components.burnable:Ignite(nil, attacker)
-			end
-		else
-			if target ~= nil and target.components.burnable ~= nil and math.random() < GLOBAL.TUNING.TORCH_ATTACK_IGNITE_PERCENT * target.components.burnable.flammability then
-				target.components.burnable:Ignite(nil, attacker)
-			end
-		end
-	end
-    
-    if inst.components.weapon then
-        inst.components.weapon:SetAttackCallback(OnAttack)
+AddPrefabPostInit("torch", function (Torch, inst)
+
+    Torch.oldOnAttackFn = Torch.OnAttack
+	
+   function Torch:OnAttack(weapon, attacker, target)
+   
+   
+   		local log = "-> " .. tostring(attacker.name) .. " (".. tostring(attacker.userid) ..") used their torch on " .. tostring(target.prefab)
+		writeLog( log )
+
+        return Torch:OnAttack(weapon, attacker, target)
+        
     end
 end)
---]]
